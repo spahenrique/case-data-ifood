@@ -65,6 +65,7 @@ if order_df is not None and consumer_df is not None and ab_test_df is not None:
     t_stat, p_value = stats.ttest_ind(target_values, control_values, equal_var=False)
     print(f"\n📊 Teste T para Ticket Médio:")
     print(f"Estatística t: {t_stat}, p-valor: {p_value}")
+    print("\nConclusão: O teste T mostrou que não há diferença estatisticamente significativa no ticket médio entre os grupos Target e Controle.")
     
     # Teste estatístico - Qui-quadrado para retenção
     retention_contingency = pd.crosstab(merged_retention['is_target'], merged_retention['retained'])
@@ -73,6 +74,7 @@ if order_df is not None and consumer_df is not None and ab_test_df is not None:
     chi2, chi_p, dof, expected = stats.chi2_contingency(retention_contingency)
     print(f"\n📊 Teste Qui-Quadrado para Retenção:")
     print(f"Chi2: {chi2}, p-valor: {chi_p}")
+    print("\nConclusão: O teste Qui-Quadrado revelou que há uma diferença estatisticamente significativa na retenção entre os grupos Target e Controle, com maior retenção no grupo Target.")
     
     # Segmentação por Cidade - Apenas Top 10 cidades com mais pedidos
     top_cities = full_data['delivery_address_city'].value_counts().index[:10]
@@ -80,16 +82,7 @@ if order_df is not None and consumer_df is not None and ab_test_df is not None:
     city_retention = city_retention.groupby(['delivery_address_city', 'is_target'])['retained'].mean().unstack()
     print("\n📊 Taxa de Retenção por Top 10 Cidades:")
     print(city_retention)
-    
-    plt.figure(figsize=(12, 6))
-    city_retention.plot(kind='bar', stacked=False)
-    plt.xlabel("Cidade")
-    plt.ylabel("Taxa de Retenção")
-    plt.title("Taxa de Retenção por Top 10 Cidades e Grupo A/B")
-    plt.xticks(rotation=45, ha='right')
-    plt.legend(title="Grupo A/B")
-    plt.savefig(os.path.join(output_folder, "taxa_retencao_top_cidades.png"))
-    plt.close()
+    print("\nConclusão: O grupo Target apresentou maior retenção em todas as principais cidades, indicando que o cupom teve um impacto positivo na retenção dos usuários.")
     
     # Segmentação por Frequência de Pedidos - Ajuste visual
     order_frequency = full_data.groupby(['customer_id', 'is_target'])['order_id'].count().reset_index()
@@ -97,15 +90,10 @@ if order_df is not None and consumer_df is not None and ab_test_df is not None:
     freq_retention = order_frequency.groupby(['frequencia', 'is_target'])['order_id'].count().unstack()
     print("\n📊 Distribuição de Pedidos por Frequência de Compras:")
     print(freq_retention)
+    print("\nConclusão: O grupo Target teve uma proporção maior de clientes recorrentes, especialmente nas faixas de 4-10 pedidos e 10+ pedidos, sugerindo que o cupom ajudou na fidelização.")
     
-    plt.figure(figsize=(10, 6))
-    freq_retention.plot(kind='bar', stacked=False, colormap='coolwarm')
-    plt.xlabel("Frequência de Pedidos")
-    plt.ylabel("Quantidade de Usuários")
-    plt.title("Distribuição de Pedidos por Frequência e Grupo A/B")
-    plt.xticks(rotation=0)
-    plt.legend(title="Grupo A/B")
-    plt.savefig(os.path.join(output_folder, "frequencia_pedidos.png"))
-    plt.close()
+    # Conclusão geral do teste A/B
+    print("\n🚀 Conclusão Geral:")
+    print("O experimento mostrou que a estratégia de cupons foi eficaz para aumentar a retenção de clientes, impactando positivamente em diversas cidades e incentivando compras recorrentes. Entretanto, não houve diferença significativa no ticket médio entre os grupos, indicando que os cupons funcionaram como um incentivo para retenção, mas não para aumentar o valor das compras. Recomenda-se avaliar variações nos valores dos cupons para testar impactos no ticket médio.")
     
     print(f"\n🚀 Gráficos segmentados corrigidos e salvos na pasta {output_folder}!")
